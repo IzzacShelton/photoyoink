@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sh.izzac.photoyoink.PrimaryController">
+   <children>
+      <SplitPane dividerPositions="0.3" VBox.vgrow="ALWAYS">
+         <items>
+            <TreeTableView fx:id="metadataTree" maxHeight="1.7976931348623157E308" minWidth="200.0">
+              <columns>
+                <TreeTableColumn fx:id="fieldColumn" prefWidth="200.0" text="Field" />
+                <TreeTableColumn fx:id="valueColumn" prefWidth="200.0" text="Value" />
+              </columns>
+               <columnResizePolicy>
+                  <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+               <contextMenu>
+                  <ContextMenu fx:id="treeContextMenu">
+                    <items>
+                      <MenuItem fx:id="expandItem" mnemonicParsing="false" text="Expand" />
+                        <MenuItem fx:id="collapseItem" mnemonicParsing="false" text="Unspecified Action" />
+                    </items>
+                  </ContextMenu>
+               </contextMenu>
+            </TreeTableView>
+            <StackPane fx:id="imageContainer" minWidth="300.0" onMouseClicked="#pickPhoto">
+               <Label text="Choose Photo" />
+               <ImageView fx:id="imageView" cache="true" fitHeight="${imageContainer.height}" fitWidth="${imageContainer.width}" pickOnBounds="true" preserveRatio="true" />
+            </StackPane>
+         </items>
+      </SplitPane>
+   </children>
+</VBox>
