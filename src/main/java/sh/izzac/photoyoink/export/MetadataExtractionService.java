@@ -12,6 +12,7 @@ import sh.izzac.photoyoink.export.model.PhotoExportModel;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Optional;
 
 public final class MetadataExtractionService {
@@ -19,6 +20,7 @@ public final class MetadataExtractionService {
 
     public Extraction extract(File file, Metadata metadata) {
         String filepath = file.getAbsolutePath();
+        BigInteger fileSize = BigInteger.valueOf(file.length());
 
         Optional<BigDecimal> lat = Optional.empty();
         Optional<BigDecimal> lon = Optional.empty();
@@ -63,13 +65,13 @@ public final class MetadataExtractionService {
         PhotoExportModel model = new PhotoExportModel(
                 Optional.empty(), // CameraID null for now
                 filepath,
+                fileSize,
                 lat,
                 lon,
                 width,
                 height,
                 camera
         );
-
         return new Extraction(model);
     }
 

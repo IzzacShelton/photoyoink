@@ -1,11 +1,13 @@
 package sh.izzac.photoyoink.export.model;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Optional;
 
 public record PhotoExportModel(
         Optional<Integer> cameraId,
         String filepath,
+        BigInteger fileSize,
         Optional<BigDecimal> latitude,
         Optional<BigDecimal> longitude,
         Optional<Integer> imageWidth,

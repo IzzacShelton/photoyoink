@@ -15,6 +15,7 @@ public final class ExportRegistry {
             List.of(
                     new TupleFormat.ColumnSpec<>("CameraID", PhotoExportModel::cameraId),
                     new TupleFormat.ColumnSpec<>("Filepath", m -> Optional.of(m.filepath())),
+                    new TupleFormat.ColumnSpec<>("FileSize", m -> Optional.of(m.fileSize())),
                     new TupleFormat.ColumnSpec<>("Latitude", m -> m.latitude().map(bd -> bd.setScale(6, java.math.RoundingMode.HALF_UP))),
                     new TupleFormat.ColumnSpec<>("Longitude", m -> m.longitude().map(bd -> bd.setScale(6, java.math.RoundingMode.HALF_UP))),
                     new TupleFormat.ColumnSpec<>("ImageWidth", PhotoExportModel::imageWidth),
