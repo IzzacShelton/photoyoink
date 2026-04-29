@@ -12,7 +12,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
@@ -22,6 +24,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import atlantafx.base.theme.CupertinoDark;
 import javafx.application.Application;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import sh.izzac.photoyoink.export.ExportRegistry;
+import sh.izzac.photoyoink.export.ExportResult;
+import sh.izzac.photoyoink.export.ExportService;
 
 public class PrimaryController {
     private record MetaRow(String name, String value) {};
@@ -32,6 +39,11 @@ public class PrimaryController {
     @FXML private ContextMenu treeContextMenu;
     @FXML private MenuItem expandItem, collapseItem;
     @FXML private ImageView imageView;
+
+    private final ExportService exportService = new ExportService();
+    private ExportResult lastExport;
+    private Menu copyTupleMenu;
+    private final java.util.List<ExportRegistry.ExportTarget> exportTargets = ExportRegistry.exportTargets();
     
     @FXML 
     public void initialize() {
@@ -52,7 +64,45 @@ public class PrimaryController {
         expandItem.setOnAction(toggleAction);
         collapseItem.setOnAction(toggleAction);
 
+        installCopyTupleMenu();
         metadataTree.setContextMenu(treeContextMenu);
+    }
+
+    private void installCopyTupleMenu() {
+        copyTupleMenu = new Menu("Copy tuple");
+
+        for (ExportRegistry.ExportTarget target : exportTargets) {
+            MenuItem item = new MenuItem(target.label());
+            item.setOnAction(e -> copyTupleTarget(target));
+            copyTupleMenu.getItems().add(item);
+        }
+
+        // Disable copy actions until a photo has been loaded.
+        treeContextMenu.setOnShowing(e -> refreshCopyTupleMenuState());
+
+        // Add a separator before the new submenu for clarity.
+        treeContextMenu.getItems().add(new SeparatorMenuItem());
+        treeContextMenu.getItems().add(copyTupleMenu);
+    }
+
+    private void refreshCopyTupleMenuState() {
+        boolean hasExport = lastExport != null;
+        for (int i = 0; i < copyTupleMenu.getItems().size(); i++) {
+            MenuItem item = copyTupleMenu.getItems().get(i);
+            ExportRegistry.ExportTarget target = exportTargets.get(i);
+            boolean hasTuple = hasExport && target.tupleText().apply(lastExport).isPresent();
+            item.setDisable(!hasTuple);
+        }
+    }
+
+    private void copyTupleTarget(ExportRegistry.ExportTarget target) {
+        if (lastExport == null) return;
+        String tuple = target.tupleText().apply(lastExport).orElse(null);
+        if (tuple == null || tuple.isBlank()) return;
+
+        ClipboardContent content = new ClipboardContent();
+        content.putString(tuple);
+        Clipboard.getSystemClipboard().setContent(content);
     }
     
     private void setExpanded(TreeItem<MetaRow> item, boolean expand) {
@@ -102,14 +152,8 @@ public class PrimaryController {
                 
                 // populate the TreeTableView
                 populateMetadata(metadata);
-                
-                for (Directory d : metadata.getDirectories()) {
-                    // directories are like categories of metadata from the image
-                    System.out.printf("%s:\n", d.getName());
-                    for (Tag t : d.getTags()) {
-                        System.out.printf("-> %s (%s): %s\n", t.getTagName(), t.getTagTypeHex(), d.getObject(t.getTagType()));
-                    }
-                }
+
+                lastExport = exportService.export(f, metadata);
             } catch (ImageProcessingException ex) {
                 ex.printStackTrace(System.err);
             }

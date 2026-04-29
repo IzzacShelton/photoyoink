@@ -6,4 +6,6 @@ module sh.izzac.photoyoink {
     
     opens sh.izzac.photoyoink to javafx.fxml;
     exports sh.izzac.photoyoink;
+    exports sh.izzac.photoyoink.export;
+    exports sh.izzac.photoyoink.export.model;
 }
