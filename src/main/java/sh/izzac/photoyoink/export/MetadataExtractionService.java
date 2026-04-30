@@ -13,9 +13,13 @@ import sh.izzac.photoyoink.export.model.PhotoExportModel;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public final class MetadataExtractionService {
+    private static final DateTimeFormatter EXIF_DATETIME = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss");
+
     public record Extraction(PhotoExportModel model) {}
 
     public Extraction extract(File file, Metadata metadata) {
@@ -60,6 +64,32 @@ public final class MetadataExtractionService {
             }
         }
 
+        Optional<LocalDateTime> dateTimeTaken = Optional.empty();
+        if (exifSub != null) {
+            String s = exifSub.getString(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+            if (s != null && !s.isBlank()) {
+                try { dateTimeTaken = Optional.of(LocalDateTime.parse(s.trim(), EXIF_DATETIME)); } catch (Exception ignored) {}
+            }
+        }
+        if (dateTimeTaken.isEmpty()) {
+            ExifIFD0Directory ifd0 = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+            if (ifd0 != null) {
+                String s = ifd0.getString(ExifIFD0Directory.TAG_DATETIME);
+                if (s != null && !s.isBlank()) {
+                    try { dateTimeTaken = Optional.of(LocalDateTime.parse(s.trim(), EXIF_DATETIME)); } catch (Exception ignored) {}
+                }
+            }
+        }
+        if (dateTimeTaken.isEmpty()) {
+            PngDirectory png = metadata.getFirstDirectoryOfType(PngDirectory.class);
+            if (png != null) {
+                String s = png.getString(PngDirectory.TAG_LAST_MODIFICATION_TIME);
+                if (s != null && !s.isBlank()) {
+                    try { dateTimeTaken = Optional.of(LocalDateTime.parse(s.trim(), EXIF_DATETIME)); } catch (Exception ignored) {}
+                }
+            }
+        }
+
         Optional<CameraExportModel> camera = extractCamera(metadata);
 
         PhotoExportModel model = new PhotoExportModel(
@@ -70,6 +100,7 @@ public final class MetadataExtractionService {
                 lon,
                 width,
                 height,
+                dateTimeTaken,
                 camera
         );
         return new Extraction(model);
@@ -99,4 +130,3 @@ public final class MetadataExtractionService {
         return Optional.of(new CameraExportModel(make, model, serial));
     }
 }
-

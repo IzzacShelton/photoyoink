@@ -3,12 +3,15 @@ package sh.izzac.photoyoink.export;
 import sh.izzac.photoyoink.export.model.CameraExportModel;
 import sh.izzac.photoyoink.export.model.PhotoExportModel;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 public final class ExportRegistry {
     private ExportRegistry() {}
+
+    private static final DateTimeFormatter MYSQL_DATETIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static final TupleFormat.TableSpec<PhotoExportModel> PHOTO = new TupleFormat.TableSpec<>(
             "Photo",
@@ -19,7 +22,8 @@ public final class ExportRegistry {
                     new TupleFormat.ColumnSpec<>("Latitude", m -> m.latitude().map(bd -> bd.setScale(6, java.math.RoundingMode.HALF_UP))),
                     new TupleFormat.ColumnSpec<>("Longitude", m -> m.longitude().map(bd -> bd.setScale(6, java.math.RoundingMode.HALF_UP))),
                     new TupleFormat.ColumnSpec<>("ImageWidth", PhotoExportModel::imageWidth),
-                    new TupleFormat.ColumnSpec<>("ImageHeight", PhotoExportModel::imageHeight)
+                    new TupleFormat.ColumnSpec<>("ImageHeight", PhotoExportModel::imageHeight),
+                    new TupleFormat.ColumnSpec<>("DateTimeTaken", m -> m.dateTimeTaken().map(dt -> dt.format(MYSQL_DATETIME)))
             )
     );
 
@@ -47,4 +51,3 @@ public final class ExportRegistry {
         );
     }
 }
-

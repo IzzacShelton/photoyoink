@@ -2,6 +2,7 @@ package sh.izzac.photoyoink.export.model;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public record PhotoExportModel(
@@ -12,6 +13,7 @@ public record PhotoExportModel(
         Optional<BigDecimal> longitude,
         Optional<Integer> imageWidth,
         Optional<Integer> imageHeight,
+        Optional<LocalDateTime> dateTimeTaken,
         Optional<CameraExportModel> camera
 ) {
     public PhotoExportModel {
@@ -23,7 +25,7 @@ public record PhotoExportModel(
         longitude = longitude == null ? Optional.empty() : longitude;
         imageWidth = imageWidth == null ? Optional.empty() : imageWidth;
         imageHeight = imageHeight == null ? Optional.empty() : imageHeight;
+        dateTimeTaken = dateTimeTaken == null ? Optional.empty() : dateTimeTaken;
         camera = camera == null ? Optional.empty() : camera;
     }
 }
-
